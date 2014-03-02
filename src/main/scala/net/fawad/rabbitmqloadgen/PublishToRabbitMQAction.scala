@@ -4,22 +4,12 @@ import akka.actor.ActorRef
 import scala.Some
 import io.gatling.core.result.message.{Status, RequestMessage, KO, OK}
 import io.gatling.core.result.writer.DataWriter
-import com.rabbitmq.client.{Connection, ConnectionFactory}
 import io.gatling.core.action.Chainable
 import io.gatling.core.session.Session
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
-object PublishToRabbitMQAction {
-  def createConnection(connectionInfo: ConnectionInfo) = {
-    val factory = new ConnectionFactory()
-    factory.setHost(connectionInfo.hostname)
-    factory.setPort(connectionInfo.port)
-    val conn = factory.newConnection()
-    conn
-  }
-}
-class PublishToRabbitMQAction(val next: ActorRef, conn: Connection, exchangeInfo: ExchangeInfo) extends Chainable {
-  val pub = new RabbitMQPublisher(conn, ExchangeInfo(exchangeInfo.name, exchangeInfo.exchangeType))
-
+class PublishToRabbitMQAction(val next: ActorRef, interactor: ActorRef, exchangeInfo: ExchangeInfo) extends Chainable {
   override def execute(session: Session) {
     var start: Long = 0L
     var end: Long = 0L
@@ -27,7 +17,7 @@ class PublishToRabbitMQAction(val next: ActorRef, conn: Connection, exchangeInfo
     var errorMessage: Option[String] = None
     try {
       start = System.currentTimeMillis
-      pub.publishMessage()
+      Await.result(interactor ask Publish(Message("Hello world".getBytes, null), exchangeInfo), Duration.Inf)
       end = System.currentTimeMillis
     } catch {
       case e: Exception =>

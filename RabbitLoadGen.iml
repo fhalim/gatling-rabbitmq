@@ -23,14 +23,14 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="Gradle: scala-library-2.10.3" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: akka-actor_2.10-2.3.0-RC4" level="project" />
     <orderEntry type="library" exported="" name="Gradle: amqp-client-3.1.3" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: config-1.2.0" level="project" />
     <orderEntry type="library" exported="" name="Gradle: scala-arm_2.10-1.3" level="project" />
     <orderEntry type="library" exported="" name="Gradle: scalalogging-slf4j_2.10-1.1.0" level="project" />
     <orderEntry type="library" exported="" name="Gradle: scala-reflect-2.10.3" level="project" />
     <orderEntry type="library" exported="" name="Gradle: slf4j-api-1.7.5" level="project" />
     <orderEntry type="library" exported="" name="Gradle: gatling-core-2.0.0-M3a" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: akka-actor_2.10-2.1.4" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: config-1.0.0" level="project" />
   </component>
 </module>
 
