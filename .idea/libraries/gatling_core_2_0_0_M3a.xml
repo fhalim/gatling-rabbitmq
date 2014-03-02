@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="gatling-core-2.0.0-M3a">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/gatling-core-2.0.0-M3a.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
