@@ -1,7 +1,7 @@
 package net.fawad.rabbitmqloadgen.tests
 
 import org.scalatest._
-import net.fawad.rabbitmqloadgen.RabbitMQMessageReader
+import net.fawad.rabbitmqloadgen.{MessageGenerator, RabbitMQMessageReader}
 import java.io.File
 import scala.io.Source
 import scala.collection.JavaConversions._
@@ -16,6 +16,7 @@ class RabbitMQMessageReaderTests extends FlatSpec {
 
   "The Message Reader" should "be able to process all existing messages" in {
     val reader = new RabbitMQMessageReader()
+    val x = new MessageGenerator(new File("/Users/halimf/tmp/messagedumps"))
     for (fileName <- new File("/Users/halimf/tmp/messagedumps").listFiles().filter(_.isFile)) {
       val contents = Source.fromFile(fileName).mkString
       val result = reader.load(contents)

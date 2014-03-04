@@ -19,12 +19,13 @@ import java.io.File
 
 class RabbitMQPublishingSimulation extends Simulation {
   implicit val timeout = Timeout(5 seconds)
+  val parallelism = 10
   val exchangeInfo = ExchangeInfo("fawad.benchmark", "fanout")
-  val interactors = system.actorOf(Props(new RabbitMQInteractor(ConnectionInfo("localhost", 5672, "guest", "guest"))).withRouter(RoundRobinRouter(nrOfInstances = 5)))
+  val interactors = system.actorOf(Props(new RabbitMQInteractor(ConnectionInfo("localhost", 5672, "guest", "guest"))).withRouter(RoundRobinRouter(nrOfInstances = 10)))
   // TODO: This is probably a stink. Figure out a good way of handling this
   Await.result(interactors ask InitializeSubscriber(exchangeInfo), Duration.Inf)
 
-  val gen = new MessageGenerator(new File("/Users/halimf/tmp/messagedumps"))
+  val gen = new MessageGenerator(new File("/Users/halimf/tmp/messagedumps")).iterator
 
   val publishToRabbitMQ = new ActionBuilder {
     def build(next: ActorRef) = system.actorOf(Props(new PublishToRabbitMQAction(next, interactors, exchangeInfo, gen)))
@@ -34,11 +35,11 @@ class RabbitMQPublishingSimulation extends Simulation {
     session.set("MessageToPublish", gen)
   }
   val scn = scenario("RabbitMQ Publishing")
-    .repeat(100000) {
+    .repeat(100) {
     exec(publishToRabbitMQ)
   }
 
-  setUp(scn.inject(ramp(5 users) over (2 seconds)))
+  setUp(scn.inject(ramp(parallelism users) over (2 seconds)))
     .assertions(global.responseTime.max.lessThan(20), global.successfulRequests.percent.is(100))
 }
 
