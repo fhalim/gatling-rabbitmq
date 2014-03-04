@@ -3,20 +3,18 @@ package net.fawad.rabbitmqloadgen
 import com.rabbitmq.client.{AMQP, Channel, ConnectionFactory}
 import com.typesafe.scalalogging.slf4j.Logger
 import org.slf4j.LoggerFactory
-import com.rabbitmq.client.AMQP.BasicProperties
 import akka.actor.Actor
 import resource.managed
 
 class RabbitMQInteractor(connectionInfo: ConnectionInfo) extends Actor {
   val conn = createConnection(connectionInfo)
-  val pubprop = new AMQP.BasicProperties.Builder().deliveryMode(2).build()
   protected lazy val logger: Logger =
     Logger(LoggerFactory getLogger getClass.getName)
 
   override def receive = {
     case Publish(msg, exchangeInfo) => for (channel <- managed(conn.createChannel())) {
       logger.debug("Publishing message")
-      channel.basicPublish(exchangeInfo.name, "", pubprop, msg.body)
+      channel.basicPublish(exchangeInfo.name, "", msg.properties, msg.body)
       sender ! Success()
     }
     case InitializeSubscriber(exchangeInfo) =>

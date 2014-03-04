@@ -1,6 +1,8 @@
 package net.fawad.rabbitmqloadgen
 
-case class Message(body: Array[Byte], headers: Map[String, String])
+import com.rabbitmq.client.AMQP.BasicProperties
+
+case class Message(body: Array[Byte], properties: BasicProperties)
 
 case class Publish(msg: Message, exchangeInfo: ExchangeInfo)
 

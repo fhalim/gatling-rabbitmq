@@ -9,7 +9,7 @@ import io.gatling.core.session.Session
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class PublishToRabbitMQAction(val next: ActorRef, interactor: ActorRef, exchangeInfo: ExchangeInfo) extends Chainable {
+class PublishToRabbitMQAction(val next: ActorRef, interactor: ActorRef, exchangeInfo: ExchangeInfo, gen: MessageGenerator) extends Chainable {
   override def execute(session: Session) {
     var start: Long = 0L
     var end: Long = 0L
@@ -17,7 +17,7 @@ class PublishToRabbitMQAction(val next: ActorRef, interactor: ActorRef, exchange
     var errorMessage: Option[String] = None
     try {
       start = System.currentTimeMillis
-      Await.result(interactor ask Publish(Message("Hello world".getBytes, null), exchangeInfo), Duration.Inf)
+      Await.result(interactor ask Publish(gen.next(), exchangeInfo), Duration.Inf)
       end = System.currentTimeMillis
     } catch {
       case e: Exception =>

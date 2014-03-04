@@ -15,6 +15,7 @@ import net.fawad.rabbitmqloadgen.ExchangeInfo
 import net.fawad.rabbitmqloadgen.ConnectionInfo
 import akka.util.Timeout
 import scala.concurrent.Await
+import java.io.File
 
 class RabbitMQPublishingSimulation extends Simulation {
   implicit val timeout = Timeout(5 seconds)
@@ -22,8 +23,15 @@ class RabbitMQPublishingSimulation extends Simulation {
   val interactors = system.actorOf(Props(new RabbitMQInteractor(ConnectionInfo("localhost", 5672, "guest", "guest"))).withRouter(RoundRobinRouter(nrOfInstances = 5)))
   // TODO: This is probably a stink. Figure out a good way of handling this
   Await.result(interactors ask InitializeSubscriber(exchangeInfo), Duration.Inf)
+
+  val gen = new MessageGenerator(new File("/Users/halimf/tmp/messagedumps"))
+
   val publishToRabbitMQ = new ActionBuilder {
-    def build(next: ActorRef) = system.actorOf(Props(new PublishToRabbitMQAction(next, interactors, exchangeInfo)))
+    def build(next: ActorRef) = system.actorOf(Props(new PublishToRabbitMQAction(next, interactors, exchangeInfo, gen)))
+  }
+
+  def setGenerator(session: Session) {
+    session.set("MessageToPublish", gen)
   }
   val scn = scenario("RabbitMQ Publishing")
     .repeat(100000) {
