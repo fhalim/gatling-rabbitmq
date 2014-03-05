@@ -1,10 +1,10 @@
 package net.fawad.rabbitmqloadgen.tests
 
 import org.scalatest._
-import net.fawad.rabbitmqloadgen.{MessageGenerator, RabbitMQMessageReader}
-import java.io.File
+import net.fawad.rabbitmqloadgen.RabbitMQMessageReader
 import scala.io.Source
 import scala.collection.JavaConversions._
+import resource.managed
 
 class RabbitMQMessageReaderTests extends FlatSpec {
   "The Message Reader" should "be able to read a simple message" in {
@@ -14,11 +14,10 @@ class RabbitMQMessageReaderTests extends FlatSpec {
     assert(result.properties.getHeaders()("a") === "B")
   }
 
-  "The Message Reader" should "be able to process all existing messages" in {
+  "The Message Reader" should "be able to process existing requests" in {
     val reader = new RabbitMQMessageReader()
-    val x = new MessageGenerator(new File("/Users/halimf/tmp/messagedumps"))
-    for (fileName <- new File("/Users/halimf/tmp/messagedumps").listFiles().filter(_.isFile)) {
-      val contents = Source.fromFile(fileName).mkString
+    for (stream <- managed(this.getClass.getClassLoader.getResourceAsStream("sample_signing_request.json"))) {
+      val contents = Source.fromInputStream(stream).mkString
       val result = reader.load(contents)
       assert(result.body != null)
       assert(result.properties != null)

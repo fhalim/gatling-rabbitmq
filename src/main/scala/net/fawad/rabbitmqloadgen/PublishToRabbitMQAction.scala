@@ -16,8 +16,9 @@ class PublishToRabbitMQAction(val next: ActorRef, interactor: ActorRef, exchange
     var status: Status = OK
     var errorMessage: Option[String] = None
     try {
+      val msg = gen.next()
       start = System.currentTimeMillis
-      Await.result(interactor ask Publish(gen.next(), exchangeInfo), Duration.Inf)
+      Await.result(interactor ask Publish(msg, exchangeInfo), Duration.Inf)
       end = System.currentTimeMillis
     } catch {
       case e: Exception =>

@@ -17,12 +17,13 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-core:2.3.1'
     compile 'com.fasterxml.jackson.module:jackson-module-scala_2.10:2.3.1'
     compile "org.scala-lang:scala-compiler:2.10.3"
+    compile 'xml-apis:xml-apis:1.4.01'
+    compile 'xerces:xercesImpl:2.11.0'
+    compile 'jaxen:jaxen:1.1.6'
     compile fileTree(dir: 'lib', include: '*.jar')
 
     testCompile 'org.scalatest:scalatest_2.10:2.0'
 }
-
-mainClassName = "net.fawad.rabbitloadgen.Main"
 
 idea {
     module {

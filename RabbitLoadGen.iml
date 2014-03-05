@@ -40,7 +40,9 @@
     <orderEntry type="library" exported="" name="Gradle: paranamer-2.6" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jsr305-2.0.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: guava-13.0.1" level="project" />
-    <orderEntry type="library" name="Scala Compiler" level="application" />
+    <orderEntry type="library" exported="" name="Gradle: xml-apis-1.4.01" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: xercesImpl-2.11.0" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: jaxen-1.1.6" level="project" />
   </component>
 </module>
 

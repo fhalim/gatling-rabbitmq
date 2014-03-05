@@ -20,12 +20,16 @@ import java.io.File
 class RabbitMQPublishingSimulation extends Simulation {
   implicit val timeout = Timeout(5 seconds)
   val parallelism = 10
+
   val exchangeInfo = ExchangeInfo("fawad.benchmark", "fanout")
   val interactors = system.actorOf(Props(new RabbitMQInteractor(ConnectionInfo("localhost", 5672, "guest", "guest"))).withRouter(RoundRobinRouter(nrOfInstances = 10)))
+
   // TODO: This is probably a stink. Figure out a good way of handling this
   Await.result(interactors ask InitializeSubscriber(exchangeInfo), Duration.Inf)
 
-  val gen = new MessageGenerator(new File("/Users/halimf/tmp/messagedumps")).iterator
+  val transformer = MessageTransformers.XpathRandomBodyReplace(List("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='dealJacketId' or local-name()='dealNumber']"))
+  val otherTransformer = MessageTransformers.XpathConstantBodyReplace(Map("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='departmentId']" -> "abcd"))
+  val gen = new MessageGenerator(new File("requests")).iterator.map(transformer).map(otherTransformer)
 
   val publishToRabbitMQ = new ActionBuilder {
     def build(next: ActorRef) = system.actorOf(Props(new PublishToRabbitMQAction(next, interactors, exchangeInfo, gen)))

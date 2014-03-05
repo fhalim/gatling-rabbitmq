@@ -12,18 +12,19 @@ class RabbitMQMessageReader {
   val bodyKey = "Body"
   val headersKey = "Headers"
   val propertiesToSkip = List(bodyKey, headersKey) ::: List("Acknowledger")
+
   val propertiesSetters = Map(
-    "Priority" -> ((b: Builder, v: Any) => b.priority(v.asInstanceOf[Int])),
-    "AppId" -> ((b: Builder, v: Any) => b.appId(v.asInstanceOf[String])),
-    "ContentEncoding" -> ((b: Builder, v: Any) => b.contentEncoding(v.asInstanceOf[String])),
-    "CorrelationId" -> ((b: Builder, v: Any) => b.correlationId(v.asInstanceOf[String])),
-    "DeliveryMode" -> ((b: Builder, v: Any) => b.deliveryMode(v.asInstanceOf[Int])),
+    "Priority" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.priority(v.asInstanceOf[Int]) else b),
+    "AppId" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.appId(v.asInstanceOf[String]) else b),
+    "ContentEncoding" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.contentEncoding(v.asInstanceOf[String]) else b),
+    "CorrelationId" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.correlationId(v.asInstanceOf[String]) else b),
+    "DeliveryMode" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.deliveryMode(v.asInstanceOf[Int]) else b),
     "Expiration" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.timestamp(DatatypeConverter.parseDateTime(v.asInstanceOf[String]).getTime) else b),
-    "MessageId" -> ((b: Builder, v: Any) => b.messageId(v.asInstanceOf[String])),
-    "ReplyTo" -> ((b: Builder, v: Any) => b.replyTo(v.asInstanceOf[String])),
-    "Timestamp" -> ((b: Builder, v: Any) => b.timestamp(DatatypeConverter.parseDateTime(v.asInstanceOf[String]).getTime)),
-    "Type" -> ((b: Builder, v: Any) => b.`type`(v.asInstanceOf[String])),
-    "ContentType" -> ((b: Builder, v: Any) => b.contentType(v.asInstanceOf[String]))
+    "MessageId" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.messageId(v.asInstanceOf[String]) else b),
+    "ReplyTo" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.replyTo(v.asInstanceOf[String]) else b),
+    "Timestamp" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.timestamp(DatatypeConverter.parseDateTime(v.asInstanceOf[String]).getTime) else b),
+    "Type" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.`type`(v.asInstanceOf[String]) else b),
+    "ContentType" -> ((b: Builder, v: Any) => if (v.toString.length > 0) b.contentType(v.asInstanceOf[String]) else b)
   )
 
   def load(body: String) = {
