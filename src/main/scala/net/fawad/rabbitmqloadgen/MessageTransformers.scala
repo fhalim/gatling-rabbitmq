@@ -17,10 +17,17 @@ object MessageTransformers {
   val dbFactory = DocumentBuilderFactory.newInstance()
   implicit val ctx = ExecutionContext.Implicits.global
 
-  def XpathRandomBodyReplace(xpathStrings: Iterable[String]) = {
-    val xpaths = xpathStrings.map(new DOMXPath(_))
-    (msg: Message) => {
+  def xml(transformers: List[Document => Any]) = {
+    msg: Message => {
       val doc = parseXML(msg)
+      transformers.foreach(_(doc))
+      Message(serializeDocument(doc).toByteArray, updateIds(msg.properties))
+    }
+  }
+
+  def xpathRandom(xpathStrings: Iterable[String]) = {
+    val xpaths = xpathStrings.map(new DOMXPath(_))
+    (doc: Document) => {
       for (xpath <- xpaths) {
         val results = xpath.evaluate(doc).asInstanceOf[util.ArrayList[Element]]
         for (node <- results) {
@@ -28,23 +35,22 @@ object MessageTransformers {
           node.setTextContent(newValue)
         }
       }
-      Message(serializeDocument(doc).toByteArray, updateIds(msg.properties))
+      doc
     }
   }
 
-  def XpathConstantBodyReplace(xpathReplacements: Map[String, String]) = {
+  def xpathConstant(xpathReplacements: Map[String, String]) = {
     val xpaths = xpathReplacements.map {
       case (k, v) => (new DOMXPath(k), v)
     }
-    (msg: Message) => {
-      val doc = parseXML(msg)
+    (doc: Document) => {
       for ((xpath, replacement) <- xpaths) {
         val results = xpath.evaluate(doc).asInstanceOf[util.ArrayList[Element]]
         for (node <- results) {
           node.setTextContent(replacement)
         }
       }
-      Message(serializeDocument(doc).toByteArray, updateIds(msg.properties))
+      doc
     }
   }
 

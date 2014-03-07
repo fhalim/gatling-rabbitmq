@@ -8,6 +8,7 @@ import io.gatling.core.action.Chainable
 import io.gatling.core.session.Session
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.util.Failure
 
 class PublishToRabbitMQAction(val next: ActorRef, interactor: ActorRef, exchangeInfo: ExchangeInfo, gen: Iterator[Message]) extends Chainable {
   override def execute(session: Session) {
@@ -18,7 +19,10 @@ class PublishToRabbitMQAction(val next: ActorRef, interactor: ActorRef, exchange
     try {
       val msg = gen.next()
       start = System.currentTimeMillis
-      Await.result(interactor ask Publish(msg, exchangeInfo), Duration.Inf)
+      Await.result(interactor ask Publish(msg, exchangeInfo), Duration.Inf) match {
+        case Failure(e) => throw e
+        case _ =>
+      }
       end = System.currentTimeMillis
     } catch {
       case e: Exception =>

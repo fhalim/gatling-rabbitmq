@@ -11,5 +11,3 @@ case class ConnectionInfo(hostname: String, port: Int, userName: String, passwor
 case class ExchangeInfo(name: String, exchangeType: String)
 
 case class InitializeSubscriber(exchangeInfo: ExchangeInfo)
-
-case class Success()

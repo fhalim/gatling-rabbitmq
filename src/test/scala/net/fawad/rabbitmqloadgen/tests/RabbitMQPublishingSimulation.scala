@@ -14,8 +14,9 @@ import akka.routing.RoundRobinRouter
 import net.fawad.rabbitmqloadgen.ExchangeInfo
 import net.fawad.rabbitmqloadgen.ConnectionInfo
 import akka.util.Timeout
-import scala.concurrent.Await
+import scala.concurrent.{Future, Await}
 import java.io.File
+import MessageTransformers._
 
 class RabbitMQPublishingSimulation extends Simulation {
   implicit val timeout = Timeout(5 seconds)
@@ -27,9 +28,13 @@ class RabbitMQPublishingSimulation extends Simulation {
   // TODO: This is probably a stink. Figure out a good way of handling this
   Await.result(interactors ask InitializeSubscriber(exchangeInfo), Duration.Inf)
 
-  val transformer = MessageTransformers.XpathRandomBodyReplace(List("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='dealJacketId' or local-name()='dealNumber']"))
-  val otherTransformer = MessageTransformers.XpathConstantBodyReplace(Map("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='departmentId']" -> "abcd"))
-  val gen = new MessageGenerator(new File("requests")).iterator.map(transformer).map(otherTransformer)
+  val transformer = xml(List(xpathRandom(List("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='dealJacketId' or local-name()='dealNumber']")),
+    xpathConstant(Map("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='departmentId']" -> "abcd"))))
+  val gen = new MessageGenerator(new File("requests")).iterator.map(transformer)
+
+  val chunkingGenerator = Future {
+    gen.next()
+  }
 
   val publishToRabbitMQ = new ActionBuilder {
     def build(next: ActorRef) = system.actorOf(Props(new PublishToRabbitMQAction(next, interactors, exchangeInfo, gen)))
@@ -38,8 +43,9 @@ class RabbitMQPublishingSimulation extends Simulation {
   def setGenerator(session: Session) {
     session.set("MessageToPublish", gen)
   }
+
   val scn = scenario("RabbitMQ Publishing")
-    .repeat(100) {
+    .repeat(1000) {
     exec(publishToRabbitMQ)
   }
 
