@@ -25,6 +25,14 @@ dependencies {
     testCompile 'org.scalatest:scalatest_2.10:2.0'
 }
 
+sourceSets {
+    test {
+        scala {
+            srcDirs = ['src/test/scala', 'src/simulations/scala']
+        }
+    }
+}
+
 idea {
     module {
         downloadJavadoc = true

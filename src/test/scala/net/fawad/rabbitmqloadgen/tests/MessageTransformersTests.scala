@@ -11,7 +11,9 @@ class MessageTransformersTests extends FlatSpec {
     val reader = new RabbitMQMessageReader()
     for (stream <- managed(this.getClass.getClassLoader.getResourceAsStream("sample_signing_request.json"))) {
       val contents = Source.fromInputStream(stream).mkString
-      val result = xml(List(xpathRandom(List("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='dealJacketId']"))))(reader.load(contents))
+      val msg = reader.load(contents)
+      val doc = MessageTransformers.parseXML(msg)
+      val result = xml(List(xpathRandom(List("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='dealJacketId']"))))(msg)
       assert(!new String(result.body).contains("NTk3ODNiYjItOTY1Mi00ODljLWEwYjgtZmZiZDk4MWM3NWUz"))
     }
   }
@@ -20,7 +22,9 @@ class MessageTransformersTests extends FlatSpec {
     val reader = new RabbitMQMessageReader()
     for (stream <- managed(this.getClass.getClassLoader.getResourceAsStream("sample_signing_request.json"))) {
       val contents = Source.fromInputStream(stream).mkString
-      val result = xml(List(xpathConstant(Map("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='departmentId']" -> "1234"))))(reader.load(contents))
+      val msg = reader.load(contents)
+      val doc = MessageTransformers.parseXML(msg)
+      val result = xml(List(xpathConstant(Map("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='departmentId']" -> "1234"))))(msg)
       assert(new String(result.body).contains("<departmentId>1234</departmentId>"))
     }
 
@@ -32,10 +36,11 @@ class MessageTransformersTests extends FlatSpec {
     for (stream <- managed(this.getClass.getClassLoader.getResourceAsStream("sample_signing_request.json"))) {
       val contents = Source.fromInputStream(stream).mkString
       val iterations = 1000
+      val msg = reader.load(contents)
       val totalTime = time {
         val transformer = xml(List(xpathRandom(List("/*[local-name()='SigningRequest']/*[local-name()='source']/*[local-name()='dealJacketId']"))))
         for (x <- 1 until iterations) {
-          val result = transformer(reader.load(contents))
+          val result = transformer(msg)
           assert(!new String(result.body).contains("NTk3ODNiYjItOTY1Mi00ODljLWEwYjgtZmZiZDk4MWM3NWUz"))
         }
       }
